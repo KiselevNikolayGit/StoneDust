@@ -1,0 +1,25 @@
+function setmounts()
+	-- mountmap = love.filesystem.load("map")()
+	max = sizeh * 0.25
+	last = mountmap[1]
+	mountcount = #mountmap - 1
+	mountscaleh = sizeh * 0.1
+	mountscalew = sizew / 170 * 10
+	mounts = {}
+	vertices = {-320, -420, mountscalew, -100, mountscalew, (mountscaleh * 5), -320, (mountscaleh * 5)}
+	for i = 1, mountcount do
+		mounts[i] = {}
+		mounts[i].b = love.physics.newBody(world, 0, sizeh * 0.9)
+		vertices = {0 + mountscalew * i, 100, mountscalew + mountscalew * i, 100, mountscalew + mountscalew * i, mountscaleh * 5, 0 + mountscalew * i, mountscaleh * 5}
+		for j = 1, (#vertices / 8) do
+			vertices[j * 4] = vertices[j * 4] - ((mountmap[i + 1] / 100) * max)
+			vertices[j * 4 - 2] = last
+			last = vertices[j * 4]
+		end
+		mounts[i].s = love.physics.newPolygonShape(vertices)
+		mounts[i].fixture = love.physics.newFixture(mounts[i].b, mounts[i].s, 5)
+	end
+	return mounts
+end
+
+return setmounts
