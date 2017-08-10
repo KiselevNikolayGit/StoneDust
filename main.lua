@@ -1,7 +1,7 @@
 -- COPYRIGHT: KISELEV NIKOLAY
 -- Licence: MIT
 -- StoneDust
--- Version: 0.4.0.0
+-- Version: 0.4.1.67
 
 sec = 0
 colors = {
@@ -12,16 +12,17 @@ colors = {
 	{102, 187, 106}
 }
 fur = {w = 1500, h = 750}
+met = {-4*30+1100, -2*30+400, -1*30+1100, -4*30+400, 2*30+1100, -5*30+400, 5*30+1100, -3*30+400, 4*30+1100, 3*30+400, 1*30+1100, 5*30+400, -4*30+1100, 4*30+400, -5*30+1100, 2*30+400}
 stars = {}
 for i = 1, 1000 do
 	stars[i] = {love.math.random(0, fur.w * 3), love.math.random(-fur.h * 3, fur.h)}
 end
 
 function love.load()
-	love.window.setMode(1200, 600, {borderless = true, fullscreen = true})
+	love.window.setMode(1200, 800, {borderless = true, fullscreen = true})
 	love.graphics.setBackgroundColor(colors[3])
 	if love.filesystem.exists("main.ttf") then
-		local aqua = love.graphics.newFont("main.ttf", 120)
+		local aqua = love.graphics.newFont("main.ttf", 170)
 		love.graphics.setFont(aqua)
 	end
 	fit()
@@ -34,7 +35,8 @@ function love.load()
 		iw = iw / s
 		ih = ih / s
 		if w / fur.w < h / fur.h then
-			side = h / s - fur.h
+			side = t[2]
+			fortouch = {0, side}
 			meshp = {x1 = 0, y1 = -side, x2 = 0, y2 = fur.h}
 			vertices = {
 			{ -- top-left
@@ -55,7 +57,8 @@ function love.load()
 				255, 255, 255}
 			}
 		else
-			side = w / s - fur.w
+			side = t[1]
+			fortouch = {side, 0}
 			meshp = {x1 = -side, y1 = 0, x2 = fur.w, y2 = 0}
 			vertices = {
 			{ -- top-left
@@ -81,20 +84,16 @@ function love.load()
 	end
 end
 
-function love.wheelmoved(x, y)
-	love.event.quit()
-end
-
 function love.mousepressed(x, y)
 	local w, h = love.window.getMode()
-	x = x / w
-	y = y / h
-	if x < 0.6 then
+	x = (x - (fortouch[1] * s)) / (fur.w * s)
+	y = (y - (fortouch[2] * s)) / (fur.h * s)
+	if x < 0.7 and y > 0 then
 		if y < 0.6 then
 			love.filesystem.load("start.lua")()
 		elseif y < 0.8 then
 			options()
-		else
+		elseif y < 1 then
 			love.event.quit()
 		end
 	end
@@ -117,7 +116,13 @@ function love.update(dt)
 		sec = 0
 		for i = 1, #stars do
 			local old = stars[i]
-			 stars[i] = {old[1] + (love.math.random(-20, 20) / 50) - 0.2, old[2] + (love.math.random(-20, 20) / 50) + 0.5}
+			stars[i] = {old[1] + (love.math.random(-20, 20) / 50) - 0.2, old[2] + (love.math.random(-20, 20) / 50) + 0.5}
+		end
+		for i = 1, #met / 2 do
+			local old = met[i * 2 - 1]
+			met[i * 2 - 1] = old + (love.math.random(-20, 20) / 20) - 0.2
+			local old = met[i * 2]
+			met[i * 2] = old + (love.math.random(-20, 20) / 20) + 0.5
 		end
 	end
 end
@@ -126,19 +131,96 @@ function love.draw()
 	love.graphics.scale(s, s)
 	love.graphics.translate(t[1], t[2])
 	love.graphics.setLineStyle("smooth")
-	love.graphics.print(tostring(love.timer.getFPS()), 5, 5, 0, 0.2, 0.2)
+	love.graphics.setLineWidth(1)	
+	love.graphics.setColor(255, 255, 255, 200)
 	for i = 1, #stars do
 		love.graphics.circle("line", stars[i][1], stars[i][2], 1)
-		love.graphics.circle("fill", stars[i][1], stars[i][2], 1)
 	end
-	love.graphics.print("Stone dust", 70, 190, math.rad(-8))
-	love.graphics.print("Start Game", 170, 380, math.rad(-7), 0.75, 0.75)
-	love.graphics.print("Options", 340, 520, math.rad(-6), 0.5, 0.5)
-	love.graphics.print("Exit", 410, 630, math.rad(-5), 0.4, 0.4)
+	love.graphics.setColor(255, 255, 255, 50)
+	love.graphics.setLineWidth(3)
+	for i = 1, #met / 2 do
+		love.graphics.circle("line", met[i * 2 - 1], met[i * 2], 1)
+	end
+	love.graphics.setLineWidth(1)
+	love.graphics.polygon("line", met)
+	love.graphics.setColor(255, 255, 255, 100)
+	love.graphics.print("Stone Dust", 30, 110, math.rad(-8))
+	love.graphics.print("Start game", 170, 300, math.rad(-7), 0.75, 0.75)
+	love.graphics.print("Options", 340, 440, math.rad(-6), 0.5, 0.5)
+	love.graphics.print("Exit", 410, 550, math.rad(-5), 0.4, 0.4)
+	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.draw(mesh, meshp.x1, meshp.y1)
 	love.graphics.draw(mesh, meshp.x2, meshp.y2)
 end
 
 function options()
 	love.window.showMessageBox("Sory", "Settings not is not in not ALPHA VER")
+end
+
+function pause()
+	local screen = love.draw
+	local mousen = love.mousepressed
+	local updatn = love.update
+	local met = {-4*30+1100, -2*30+400, -1*30+1100, -4*30+400, 2*30+1100, -5*30+400, 5*30+1100, -3*30+400, 4*30+1100, 3*30+400, 1*30+1100, 5*30+400, -4*30+1100, 4*30+400, -5*30+1100, 2*30+400}
+	local stars = {}
+	for i = 1, 1000 do
+		stars[i] = {love.math.random(0, fur.w * 3), love.math.random(-fur.h * 3, fur.h)}
+	end
+	function love.update(dt)
+		sec = sec + dt
+		if sec > 0.05 then
+			sec = 0
+			for i = 1, #stars do
+				local old = stars[i]
+				stars[i] = {old[1] + (love.math.random(-20, 20) / 50) - 0.2, old[2] + (love.math.random(-20, 20) / 50) + 0.5}
+			end
+			for i = 1, #met / 2 do
+				local old = met[i * 2 - 1]
+				met[i * 2 - 1] = old + (love.math.random(-20, 20) / 20) - 0.2
+				local old = met[i * 2]
+				met[i * 2] = old + (love.math.random(-20, 20) / 20) + 0.5
+			end
+		end
+	end
+	function love.mousepressed(x, y)
+		local w, h = love.window.getMode()
+		x = (x - (fortouch[1] * s)) / (fur.w * s)
+		y = (y - (fortouch[2] * s)) / (fur.h * s)
+		if x < 0.7 and y > 0 then
+			if y < 0.6 then
+				love.draw = screen
+				love.mousepressed = mousen
+				love.update = updatn
+			elseif y < 0.8 then
+				options()
+			elseif y < 1 then
+				love.event.quit()
+			end
+		end
+	end
+	function love.draw()
+		love.graphics.scale(s, s)
+		love.graphics.translate(t[1], t[2])
+		love.graphics.setLineStyle("smooth")
+		love.graphics.setLineWidth(1)	
+		love.graphics.setColor(255, 255, 255, 200)
+		for i = 1, #stars do
+			love.graphics.circle("line", stars[i][1], stars[i][2], 1)
+		end
+		love.graphics.setColor(255, 255, 255, 50)
+		love.graphics.setLineWidth(3)
+		for i = 1, #met / 2 do
+			love.graphics.circle("line", met[i * 2 - 1], met[i * 2], 1)
+		end
+		love.graphics.setLineWidth(1)
+		love.graphics.polygon("line", met)
+		love.graphics.setColor(255, 255, 255, 100)
+		love.graphics.print("Stone Dust", 30, 110, math.rad(-8))
+		love.graphics.print("Resume game", 140, 300, math.rad(-7), 0.75, 0.75)
+		love.graphics.print("Options", 340, 440, math.rad(-6), 0.5, 0.5)
+		love.graphics.print("Exit", 410, 550, math.rad(-5), 0.4, 0.4)
+		love.graphics.setColor(255, 255, 255, 255)
+		love.graphics.draw(mesh, meshp.x1, meshp.y1)
+		love.graphics.draw(mesh, meshp.x2, meshp.y2)
+	end
 end
