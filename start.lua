@@ -1,11 +1,15 @@
+love.graphics.setBackgroundColor(colors[3])
 love.physics.setMeter(12)
 love.graphics.setBackgroundColor(colors[2])
-World = love.physics.newWorld(0, 420)
+World = love.physics.newWorld(0, 420, true)
 edge = {}
 edge.b = love.physics.newBody(World, 0, 0, "static")
-edge.s = love.physics.newChainShape(false, 0, 0, 0, fur.h, fur.w, fur.h, fur.w, 0)
+edge.s = love.physics.newChainShape(true, 0, -200, 0, fur.h, fur.w, fur.h, fur.w, -200)
 edge.f = love.physics.newFixture(edge.b, edge.s)
 power = 0
+sms = 0
+nowrock = 1
+isnow = nowrock
 
 met = {
 	up = function()
@@ -30,26 +34,31 @@ met = {
 	end
 }
 
-met.b = love.physics.newBody(World, 150, -500, "dynamic")
+met.b = love.physics.newBody(World, 150, -165, "dynamic")
 met.s = love.physics.newPolygonShape(-4*7, -2*7, -1*7, -4*7, 2*7, -5*7, 5*7, -3*7, 4*7, 3*7, 1*7, 5*7, -4*7, 4*7, -5*7, 2*7)
 met.f = love.physics.newFixture(met.b, met.s)
+met.f:setRestitution(0.3)
 
 stars = {}
 for i = 1, 230 do
 	stars[i] = {love.math.random(0, fur.w), love.math.random(0, fur.h)}
 end
 
-WM = {}
-for i = 1, 4 do
+rocks = {}
+for i = 1, 5 do
 	map = {}
 	for j = 1, 31 do
 		map[#map + 1] = 50 * (j - 1)
-		map[#map + 1] = love.math.random(fur.h - 100, fur.h) - ((i-1) * 100)
+		map[#map + 1] = love.math.random(fur.h - 350, fur.h - 250) + ((i - 1) * 140)
 	end
-	WM[i] = {dow = love.math.random(1, 30)}
-	WM[i].b = love.physics.newBody(World, 0, 0, "static")
-	WM[i].s = love.physics.newChainShape(false, map)
-	WM[i].f = love.physics.newFixture(WM[i].b, WM[i].s)
+	rocks[i] = {}
+	rocks[i].dow = {}
+		rocks[i].dow.b = love.physics.newBody(World, love.math.random(29, 1479), fur.h - 370 + ((i - 1) * 140), "static")
+		rocks[i].dow.s = love.physics.newCircleShape(10)
+		rocks[i].dow.f = love.physics.newFixture(rocks[i].dow.b, rocks[i].dow.s)
+	rocks[i].b = love.physics.newBody(World, 0, 0, "static")
+	rocks[i].s = love.physics.newChainShape(false, map)
+	rocks[i].f = love.physics.newFixture(rocks[i].b, rocks[i].s)
 end
 
 function love.mousepressed(x, y)
@@ -70,7 +79,9 @@ function love.mousepressed(x, y)
 end
 
 function love.keypressed(key)
-	if key == "up" then
+	if key == "escape" then
+		pause()
+	elseif key == "up" then
 		met.up()
 	elseif key == "right" then
 		met.rg()
@@ -81,6 +92,39 @@ end
 
 function love.update(dt)
 	World:update(dt)
+	if isnow ~= nowrock then
+		isnow = nowrock
+		sms = 0
+	end
+	if sms < 14 then
+		sms = sms + 1
+		met.b:setY(met.b:getY() - 15)		
+		for i = nowrock, #rocks do
+			rocks[i].b:setY(rocks[i].b:getY() - 10)
+			rocks[i].dow.b:setY(rocks[i].dow.b:getY() - 10)
+		end
+	elseif sms == 14 then
+		sms = sms + 1
+		met.b:setY(met.b:getY() - 15)		
+		for i = nowrock, #rocks do
+			rocks[i].b:setY(rocks[i].b:getY() - 10)
+			rocks[i].dow.b:setY(rocks[i].dow.b:getY() - 10)
+		end
+		i = #rocks + 1
+		map = {}
+		for j = 1, 31 do
+			map[#map + 1] = 50 * (j - 1)
+			map[#map + 1] = love.math.random(fur.h - 350, fur.h - 250) + ((i - 1) * 140) - (nowrock * 140)
+		end
+		rocks[i] = {}
+		rocks[i].dow = {}
+			rocks[i].dow.b = love.physics.newBody(World, love.math.random(29, 1479), fur.h - 370 + ((i - 1) * 140) - (nowrock * 140), "static")
+			rocks[i].dow.s = love.physics.newCircleShape(10)
+			rocks[i].dow.f = love.physics.newFixture(rocks[i].dow.b, rocks[i].dow.s)
+		rocks[i].b = love.physics.newBody(World, 0, 0, "static")
+		rocks[i].s = love.physics.newChainShape(false, map)
+		rocks[i].f = love.physics.newFixture(rocks[i].b, rocks[i].s)
+	end
 	sec = sec + dt
 	if sec > 0.05 then
 		sec = 0
@@ -97,20 +141,53 @@ function love.draw()
 	love.graphics.translate(t[1], t[2])
 	love.graphics.setLineStyle("smooth")
 	love.graphics.setLineWidth(1)
+	love.graphics.setColor(colors[1])
+	love.graphics.setFont(aqua[5])
+	love.graphics.print("Pause", 5, 5)
 	love.graphics.setColor(255, 255, 255, 90)
-	love.graphics.print("Pause", 5, 5, 0, 0.23, 0.23)
 	for i = 1, #stars do
 		love.graphics.circle("line", stars[i][1], stars[i][2], 1)
 	end
-	love.graphics.setLineWidth(4)
+	love.graphics.setLineWidth(5)
+	for i, v in ipairs(rocks) do
+		if not rocks[i].b:isDestroyed() then
+			if nowrock == i then
+				love.graphics.setColor(colors[3])
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 10)
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 2)
+				love.graphics.setColor(colors[1])
+			else
+				love.graphics.setColor(colors[3][1], colors[3][2], colors[3][3], 100)
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 10)
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 2)
+				love.graphics.setColor(colors[1][1], colors[1][2], colors[1][3], 100)
+			end
+			love.graphics.line(rocks[i].b:getWorldPoints(rocks[i].s:getPoints()))
+		end
+	end
 	love.graphics.setColor(colors[4])
 	love.graphics.polygon("line", met.b:getWorldPoints(met.s:getPoints()))
-	love.graphics.print("._.", met.b:getX(), met.b:getY(), met.b:getAngle() + 0.3, 0.2, 0.2, 20, 330)
-	love.graphics.setColor(colors[1])
-	for i, v in ipairs(WM) do
-		love.graphics.line(WM[i].b:getWorldPoints(WM[i].s:getPoints()))
-	end
+	love.graphics.print("._.", met.b:getX(), met.b:getY(), met.b:getAngle() + 0.3, 1, 1, 1, 64)
 	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.draw(mesh, meshp.x1, meshp.y1)
 	love.graphics.draw(mesh, meshp.x2, meshp.y2)
 end
+
+function beginContact(a, b, coll)
+	if a == met.f or b == met.f then
+		if a == rocks[nowrock].dow.f or b == rocks[nowrock].dow.f then
+			rocks[nowrock].dow.b:destroy()
+			rocks[nowrock].b:destroy()
+			rocks[nowrock].dow.f:destroy()
+			rocks[nowrock].f:destroy()
+			nowrock = nowrock + 1
+		end
+	end
+end
+function endContact(a, b, coll)
+end
+function preSolve(a, b, coll)
+end
+function postSolve(a, b, coll, normalimpulse, tangentimpulse)
+end
+World:setCallbacks(beginContact, endContact, preSolve, postSolve)

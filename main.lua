@@ -1,7 +1,7 @@
 -- COPYRIGHT: KISELEV NIKOLAY
 -- Licence: MIT
 -- StoneDust
--- Version: 0.4.1.67
+-- Version: 0.5.2
 
 sec = 0
 colors = {
@@ -9,7 +9,7 @@ colors = {
 	{92, 107, 192},
 	{63, 81, 181},
 	{255, 112, 67},
-	{102, 187, 106}
+	{33, 150, 243}
 }
 fur = {w = 1500, h = 750}
 met = {-4*30+1100, -2*30+400, -1*30+1100, -4*30+400, 2*30+1100, -5*30+400, 5*30+1100, -3*30+400, 4*30+1100, 3*30+400, 1*30+1100, 5*30+400, -4*30+1100, 4*30+400, -5*30+1100, 2*30+400}
@@ -18,70 +18,85 @@ for i = 1, 1000 do
 	stars[i] = {love.math.random(0, fur.w * 3), love.math.random(-fur.h * 3, fur.h)}
 end
 
-function love.load()
-	love.window.setMode(1200, 800, {borderless = true, fullscreen = true})
-	love.graphics.setBackgroundColor(colors[3])
-	if love.filesystem.exists("main.ttf") then
-		local aqua = love.graphics.newFont("main.ttf", 170)
-		love.graphics.setFont(aqua)
+function fit()
+	local w, h = love.window.getMode()
+	if w / fur.w < h / fur.h then
+		s = w / fur.w
+		t = {0, (h / s - fur.h) / 2}
+	else
+		s = h / fur.h
+		t = {(w / s - fur.w) / 2, 0}
 	end
-	fit()
-	do --MESH
-		backimg = love.graphics.newImage("bg.bmp")
-		backimg:setWrap("repeat")
-		backimg:setFilter("nearest")
-		local w, h = love.window.getMode()
-		local iw, ih = backimg:getDimensions()
-		iw = iw / s
-		ih = ih / s
-		if w / fur.w < h / fur.h then
-			side = t[2]
-			fortouch = {0, side}
-			meshp = {x1 = 0, y1 = -side, x2 = 0, y2 = fur.h}
-			vertices = {
-			{ -- top-left
-				0, 0,
-				0, 0,
-				255, 255, 255},
-			{ -- top-right
-				fur.w, 0,
-				fur.w / iw, 0,
-				255, 255, 255},
-			{ -- bottom-right
-				fur.w, side,
-				fur.w / iw, side / ih,
-				255, 255, 255},
-			{ -- bottom-left
-				0, side,
-				0, side / ih,
-				255, 255, 255}
-			}
-		else
-			side = t[1]
-			fortouch = {side, 0}
-			meshp = {x1 = -side, y1 = 0, x2 = fur.w, y2 = 0}
-			vertices = {
-			{ -- top-left
-				0, 0,
-				0, 0,
-				255, 255, 255},
-			{ -- top-right
-				side, 0,
-				side / iw, 0,
-				255, 255, 255},
-			{ -- bottom-right
-				side, fur.h,
-				side / iw, fur.h / ih,
-				255, 255, 255},
-			{ -- bottom-left
-				0, fur.h,
-				0, fur.h / ih,
-				255, 255, 255}
-			}
-		end
-		mesh = love.graphics.newMesh(vertices, "fan")
-		mesh:setTexture(backimg)
+end
+
+love.window.setMode(1200, 600, {borderless = true, fullscreen = true})
+love.window.setPosition(0, 0)
+love.graphics.setBackgroundColor(colors[3])
+if love.filesystem.exists("main.ttf") then
+	aqua = {
+		love.graphics.newFont("main.ttf", 170),
+		love.graphics.newFont("main.ttf", 170 * 0.75),
+		love.graphics.newFont("main.ttf", 170 * 0.5),
+		love.graphics.newFont("main.ttf", 170 * 0.4),
+		love.graphics.newFont("main.ttf", 30)
+	}
+end
+fit()
+do --MESH
+	backimg = love.graphics.newImage("bg.bmp")
+	backimg:setWrap("repeat")
+	backimg:setFilter("nearest")
+	local w, h = love.window.getMode()
+	local iw, ih = backimg:getDimensions()
+	iw = iw / s
+	ih = ih / s
+	if w / fur.w < h / fur.h then
+		side = t[2]
+		fortouch = {0, side}
+		meshp = {x1 = 0, y1 = -side, x2 = 0, y2 = fur.h}
+		vertices = {
+		{ -- top-left
+			0, 0,
+			0, 0,
+			255, 255, 255},
+		{ -- top-right
+			fur.w, 0,
+			fur.w / iw, 0,
+			255, 255, 255},
+		{ -- bottom-right
+			fur.w, side,
+			fur.w / iw, side / ih,
+			255, 255, 255},
+		{ -- bottom-left
+			0, side,
+			0, side / ih,
+			255, 255, 255}
+		}
+	else
+		side = t[1]
+		fortouch = {side, 0}
+		meshp = {x1 = -side, y1 = 0, x2 = fur.w, y2 = 0}
+		vertices = {
+		{ -- top-left
+			0, 0,
+			0, 0,
+			255, 255, 255},
+		{ -- top-right
+			side, 0,
+			side / iw, 0,
+			255, 255, 255},
+		{ -- bottom-right
+			side, fur.h,
+			side / iw, fur.h / ih,
+			255, 255, 255},
+		{ -- bottom-left
+			0, fur.h,
+			0, fur.h / ih,
+			255, 255, 255}
+		}
 	end
+	mesh = love.graphics.newMesh(vertices, "fan")
+	mesh:setTexture(backimg)
 end
 
 function love.mousepressed(x, y)
@@ -96,17 +111,6 @@ function love.mousepressed(x, y)
 		elseif y < 1 then
 			love.event.quit()
 		end
-	end
-end
-
-function fit()
-	local w, h = love.window.getMode()
-	if w / fur.w < h / fur.h then
-		s = w / fur.w
-		t = {0, (h / s - fur.h) / 2}
-	else
-		s = h / fur.h
-		t = {(w / s - fur.w) / 2, 0}
 	end
 end
 
@@ -143,11 +147,15 @@ function love.draw()
 	end
 	love.graphics.setLineWidth(1)
 	love.graphics.polygon("line", met)
-	love.graphics.setColor(255, 255, 255, 100)
+	love.graphics.setColor(colors[1])
+	love.graphics.setFont(aqua[1])
 	love.graphics.print("Stone Dust", 30, 110, math.rad(-8))
-	love.graphics.print("Start game", 170, 300, math.rad(-7), 0.75, 0.75)
-	love.graphics.print("Options", 340, 440, math.rad(-6), 0.5, 0.5)
-	love.graphics.print("Exit", 410, 550, math.rad(-5), 0.4, 0.4)
+	love.graphics.setFont(aqua[2])
+	love.graphics.print("Start game", 170, 300, math.rad(-7))
+	love.graphics.setFont(aqua[3])
+	love.graphics.print("Options", 340, 440, math.rad(-6))
+	love.graphics.setFont(aqua[4])
+	love.graphics.print("Exit", 410, 570, math.rad(-5))
 	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.draw(mesh, meshp.x1, meshp.y1)
 	love.graphics.draw(mesh, meshp.x2, meshp.y2)
@@ -194,7 +202,7 @@ function pause()
 			elseif y < 0.8 then
 				options()
 			elseif y < 1 then
-				love.event.quit()
+				dofile("main.lua")
 			end
 		end
 	end
@@ -214,11 +222,15 @@ function pause()
 		end
 		love.graphics.setLineWidth(1)
 		love.graphics.polygon("line", met)
-		love.graphics.setColor(255, 255, 255, 100)
-		love.graphics.print("Stone Dust", 30, 110, math.rad(-8))
-		love.graphics.print("Resume game", 140, 300, math.rad(-7), 0.75, 0.75)
-		love.graphics.print("Options", 340, 440, math.rad(-6), 0.5, 0.5)
-		love.graphics.print("Exit", 410, 550, math.rad(-5), 0.4, 0.4)
+		love.graphics.setColor(colors[1])
+		love.graphics.setFont(aqua[1])
+		love.graphics.print("Star Pause", 10, 110, math.rad(-8))
+		love.graphics.setFont(aqua[2])
+		love.graphics.print("Resume game", 140, 300, math.rad(-7))
+		love.graphics.setFont(aqua[3])
+		love.graphics.print("Options", 340, 440, math.rad(-6))
+		love.graphics.setFont(aqua[4])
+		love.graphics.print("Exit", 410, 570, math.rad(-5))
 		love.graphics.setColor(255, 255, 255, 255)
 		love.graphics.draw(mesh, meshp.x1, meshp.y1)
 		love.graphics.draw(mesh, meshp.x2, meshp.y2)
