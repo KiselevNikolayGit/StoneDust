@@ -7,13 +7,13 @@ mainsou = love.audio.newSource("long.wav", "static")
 mainsou:setLooping(true)
 mainsou:play()
 
-protomet = love.filesystem.read("met.ghtb")
+protomet = love.filesystem.read("met.i")
 if protomet == nil then
 	protomet = "-4-2-1-402-505-304030105-404-502"	
-	love.filesystem.write("met.ghtb", protomet)
+	love.filesystem.write("lvl.i", 1)
 end
 metamet = {protomet:sub(1,2), protomet:sub(3,4), protomet:sub(5,6), protomet:sub(7,8), protomet:sub(9,10), protomet:sub(11,12), protomet:sub(13,14), protomet:sub(15,16), protomet:sub(17,18), protomet:sub(19,20), protomet:sub(21,22), protomet:sub(23,24), protomet:sub(25,26), protomet:sub(27,28), protomet:sub(29,30), protomet:sub(31,32)}
-print(table.concat(metamet, ""))
+love.filesystem.write("met.i", table.concat(metamet, ""))
 
 sec = 0
 colors = {
@@ -24,7 +24,7 @@ colors = {
 	{33, 150, 243}
 }
 fur = {w = 1500, h = 750}
-met = {metamet[1]*30+1100, metamet[2]*30+400, metamet[3]*30+1100, metamet[4]*30+400, metamet[5]*30+1100, metamet[6]*30+400, metamet[7]*30+1100, metamet[8]*30+400, metamet[9]*30+1100, metamet[10]*30+400, metamet[11]*30+1100, metamet[12]*30+400, metamet[13]*30+1100, metamet[14]*30+400, metamet[15]*30+1100, metamet[16]*30+400}
+met = {tonumber(metamet[1])*30+1100, tonumber(metamet[2])*30+400, tonumber(metamet[3])*30+1100, tonumber(metamet[4])*30+400, tonumber(metamet[5])*30+1100, tonumber(metamet[6])*30+400, tonumber(metamet[7])*30+1100, tonumber(metamet[8])*30+400, tonumber(metamet[9])*30+1100, tonumber(metamet[10])*30+400, tonumber(metamet[11])*30+1100, tonumber(metamet[12])*30+400, tonumber(metamet[13])*30+1100, tonumber(metamet[14])*30+400, tonumber(metamet[15])*30+1100, tonumber(metamet[16])*30+400}
 stars = {}
 for i = 1, 1000 do
 	stars[i] = {love.math.random(0, fur.w * 3), love.math.random(-fur.h * 3, fur.h)}
@@ -119,7 +119,7 @@ function love.mousepressed(x, y)
 		if y < 0.6 then
 			love.filesystem.load("start.lua")()
 		elseif y < 0.8 then
-			options()
+			love.filesystem.load("deshop.lua")()
 		elseif y < 1 then
 			love.event.quit()
 		end
@@ -165,7 +165,7 @@ function love.draw()
 	love.graphics.setFont(aqua[2])
 	love.graphics.print("Start game", 170, 300, math.rad(-7))
 	love.graphics.setFont(aqua[3])
-	love.graphics.print("De Shop", 340, 440, math.rad(-6))
+	love.graphics.print("De Shop", 320, 460, math.rad(-6))
 	love.graphics.setFont(aqua[4])
 	love.graphics.print("Exit", 410, 570, math.rad(-5))
 	love.graphics.setColor(255, 255, 255, 255)
@@ -173,15 +173,11 @@ function love.draw()
 	love.graphics.draw(mesh, meshp.x2, meshp.y2)
 end
 
-function options()
-	love.window.showMessageBox("Sory", "Settings not is not in not ALPHA VER")
-end
-
 function pause()
 	local screen = love.draw
 	local mousen = love.mousepressed
 	local updatn = love.update
-	local met = {metamet[1]*30+1100, metamet[2]*30+400, metamet[3]*30+1100, metamet[4]*30+400, metamet[5]*30+1100, metamet[6]*30+400, metamet[7]*30+1100, metamet[8]*30+400, metamet[9]*30+1100, metamet[10]*30+400, metamet[11]*30+1100, metamet[12]*30+400, metamet[13]*30+1100, metamet[14]*30+400, metamet[15]*30+1100, metamet[16]*30+400}
+	local met = {tonumber(metamet[1])*30+1100, tonumber(metamet[2])*30+400, tonumber(metamet[3])*30+1100, tonumber(metamet[4])*30+400, tonumber(metamet[5])*30+1100, tonumber(metamet[6])*30+400, tonumber(metamet[7])*30+1100, tonumber(metamet[8])*30+400, tonumber(metamet[9])*30+1100, tonumber(metamet[10])*30+400, tonumber(metamet[11])*30+1100, tonumber(metamet[12])*30+400, tonumber(metamet[13])*30+1100, tonumber(metamet[14])*30+400, tonumber(metamet[15])*30+1100, tonumber(metamet[16])*30+400}
 	local stars = {}
 	for i = 1, 1000 do
 		stars[i] = {love.math.random(0, fur.w * 3), love.math.random(-fur.h * 3, fur.h)}

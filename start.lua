@@ -32,20 +32,20 @@ met = {
 	rg = function()
 		if power > 1 then
 			met.b:applyForce( 300000, -400000)
-			met.b:applyAngularImpulse(20000)
+			met.b:applyAngularImpulse(200000)
 			power = 0
 		end
 	end,
 	lf = function()
 		if power > 1 then
 			met.b:applyForce(-300000, -400000)
-			met.b:applyAngularImpulse(-20000)
+			met.b:applyAngularImpulse(-200000)
 			power = 0
 		end
 	end
 }
 
-met.map = {metamet[1]*9, metamet[2]*9, metamet[3]*9, metamet[4]*9, metamet[5]*9, metamet[6]*9, metamet[7]*9, metamet[8]*9, metamet[9]*9, metamet[10]*9, metamet[11]*9, metamet[12]*9, metamet[13]*9, metamet[14]*9, metamet[15]*9, metamet[16]*9}
+met.map = {tonumber(metamet[1])*9, tonumber(metamet[2])*9, tonumber(metamet[3])*9, tonumber(metamet[4])*9, tonumber(metamet[5])*9, tonumber(metamet[6])*9, tonumber(metamet[7])*9, tonumber(metamet[8])*9, tonumber(metamet[9])*9, tonumber(metamet[10])*9, tonumber(metamet[11])*9, tonumber(metamet[12])*9, tonumber(metamet[13])*9, tonumber(metamet[14])*9, tonumber(metamet[15])*9, tonumber(metamet[16])*9}
 met.b = love.physics.newBody(World, 150, -165, "dynamic")
 met.s = love.physics.newPolygonShape(met.map)
 met.f = love.physics.newFixture(met.b, met.s)
