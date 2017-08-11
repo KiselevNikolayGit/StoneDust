@@ -1,3 +1,14 @@
+bitso = love.audio.newSource("shot.wav", "static")
+bitso:setLooping(true)
+bitso:play()
+
+st = love.filesystem.read("stndst.i")
+if st ~= nil then
+	score = tonumber(st)
+else
+	score = 1
+end
+
 love.graphics.setBackgroundColor(colors[3])
 love.physics.setMeter(12)
 love.graphics.setBackgroundColor(colors[2])
@@ -34,8 +45,9 @@ met = {
 	end
 }
 
+met.map = {metamet[1]*9, metamet[2]*9, metamet[3]*9, metamet[4]*9, metamet[5]*9, metamet[6]*9, metamet[7]*9, metamet[8]*9, metamet[9]*9, metamet[10]*9, metamet[11]*9, metamet[12]*9, metamet[13]*9, metamet[14]*9, metamet[15]*9, metamet[16]*9}
 met.b = love.physics.newBody(World, 150, -165, "dynamic")
-met.s = love.physics.newPolygonShape(-4*7, -2*7, -1*7, -4*7, 2*7, -5*7, 5*7, -3*7, 4*7, 3*7, 1*7, 5*7, -4*7, 4*7, -5*7, 2*7)
+met.s = love.physics.newPolygonShape(met.map)
 met.f = love.physics.newFixture(met.b, met.s)
 met.f:setRestitution(0.3)
 
@@ -94,6 +106,8 @@ function love.update(dt)
 	World:update(dt)
 	if isnow ~= nowrock then
 		isnow = nowrock
+		score = score + 1
+		love.filesystem.write("stndst.i", tostring(score))
 		sms = 0
 	end
 	if sms < 14 then
@@ -143,7 +157,8 @@ function love.draw()
 	love.graphics.setLineWidth(1)
 	love.graphics.setColor(colors[1])
 	love.graphics.setFont(aqua[5])
-	love.graphics.print("Pause", 5, 5)
+	love.graphics.print("Pause", 5, 0)
+	love.graphics.print(tostring(score), 1400, 0)
 	love.graphics.setColor(255, 255, 255, 90)
 	for i = 1, #stars do
 		love.graphics.circle("line", stars[i][1], stars[i][2], 1)
@@ -153,13 +168,13 @@ function love.draw()
 		if not rocks[i].b:isDestroyed() then
 			if nowrock == i then
 				love.graphics.setColor(colors[3])
-				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 10)
-				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 2)
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 15)
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 3)
 				love.graphics.setColor(colors[1])
 			else
 				love.graphics.setColor(colors[3][1], colors[3][2], colors[3][3], 100)
-				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 10)
-				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 2)
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 15)
+				love.graphics.circle("line", rocks[i].dow.b:getX(), rocks[i].dow.b:getY(), 3)
 				love.graphics.setColor(colors[1][1], colors[1][2], colors[1][3], 100)
 			end
 			love.graphics.line(rocks[i].b:getWorldPoints(rocks[i].s:getPoints()))
@@ -167,7 +182,7 @@ function love.draw()
 	end
 	love.graphics.setColor(colors[4])
 	love.graphics.polygon("line", met.b:getWorldPoints(met.s:getPoints()))
-	love.graphics.print("._.", met.b:getX(), met.b:getY(), met.b:getAngle() + 0.3, 1, 1, 1, 64)
+	love.graphics.print("._.", met.b:getX(), met.b:getY(), met.b:getAngle() + 0.3, 1, 1, 3, 80)
 	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.draw(mesh, meshp.x1, meshp.y1)
 	love.graphics.draw(mesh, meshp.x2, meshp.y2)
