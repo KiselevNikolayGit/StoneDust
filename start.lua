@@ -1,16 +1,17 @@
-bitso = love.audio.newSource("shot.wav", "static")
-bitso:setLooping(true)
-bitso:play()
+-- COPYRIGHT: KISELEV NIKOLAY
+-- Licence: MIT
+-- StoneDust
+-- Version: 2.1.57.4
 
-st = love.filesystem.read("stndst.i")
-if st ~= nil then
-	score = tonumber(st)
-else
-	score = 1
+if bitso ~= nil then bitso:stop() end
+if love.filesystem.exists("s.waw") then
+	bitso = love.audio.newSource("s.wav", "static")
+	bitso:setLooping(true)
+	bitso:play()
 end
 
 love.graphics.setBackgroundColor(colors[3])
-love.physics.setMeter(12)
+love.physics.setMeter(math.floor(fur.w / 3))
 love.graphics.setBackgroundColor(colors[2])
 World = love.physics.newWorld(0, 420, true)
 edge = {}
@@ -18,28 +19,32 @@ edge.b = love.physics.newBody(World, 0, 0, "static")
 edge.s = love.physics.newChainShape(true, 0, -200, 0, fur.h, fur.w, fur.h, fur.w, -200)
 edge.f = love.physics.newFixture(edge.b, edge.s)
 power = 0
+appower = 5
 sms = 0
 nowrock = 1
 isnow = nowrock
 
+quote = "touch up and jump,\ntouch side to roll"
+quotes = {""}
+
 met = {
 	up = function()
 		if power > 1 then
-			met.b:applyForce(0, -400000)
+			met.b:applyLinearImpulse(0, -4)
 			power = 0
 		end
 	end,
 	rg = function()
 		if power > 1 then
-			met.b:applyForce( 300000, -400000)
-			met.b:applyAngularImpulse(200000)
+			met.b:applyLinearImpulse(5, -4)
+			met.b:applyAngularImpulse(100)
 			power = 0
 		end
 	end,
 	lf = function()
 		if power > 1 then
-			met.b:applyForce(-300000, -400000)
-			met.b:applyAngularImpulse(-200000)
+			met.b:applyLinearImpulse(-5, -4)
+			met.b:applyAngularImpulse(-100)
 			power = 0
 		end
 	end
@@ -66,7 +71,7 @@ for i = 1, 5 do
 	rocks[i] = {}
 	rocks[i].dow = {}
 		rocks[i].dow.b = love.physics.newBody(World, love.math.random(29, 1479), fur.h - 370 + ((i - 1) * 140), "static")
-		rocks[i].dow.s = love.physics.newCircleShape(10)
+		rocks[i].dow.s = love.physics.newCircleShape(20)
 		rocks[i].dow.f = love.physics.newFixture(rocks[i].dow.b, rocks[i].dow.s)
 	rocks[i].b = love.physics.newBody(World, 0, 0, "static")
 	rocks[i].s = love.physics.newChainShape(false, map)
@@ -79,7 +84,7 @@ function love.mousepressed(x, y)
 	y = (y - (fortouch[2] * s)) / (fur.h * s)
 	if x < 0.1 and y < 0.1 then
 		pause()
-	elseif y < 0.5 then
+	elseif y < 0.3 then
 		met.up()
 	else
 		if x < 0.5 then
@@ -104,6 +109,9 @@ end
 
 function love.update(dt)
 	World:update(dt)
+	if rocks[nowrock].dow.b:getType() == "static" then
+		rocks[nowrock].dow.b:setType("dynamic")
+	end
 	if isnow ~= nowrock then
 		isnow = nowrock
 		score = score + 1
@@ -133,7 +141,7 @@ function love.update(dt)
 		rocks[i] = {}
 		rocks[i].dow = {}
 			rocks[i].dow.b = love.physics.newBody(World, love.math.random(29, 1479), fur.h - 370 + ((i - 1) * 140) - (nowrock * 140), "static")
-			rocks[i].dow.s = love.physics.newCircleShape(10)
+			rocks[i].dow.s = love.physics.newCircleShape(20)
 			rocks[i].dow.f = love.physics.newFixture(rocks[i].dow.b, rocks[i].dow.s)
 		rocks[i].b = love.physics.newBody(World, 0, 0, "static")
 		rocks[i].s = love.physics.newChainShape(false, map)
@@ -147,13 +155,15 @@ function love.update(dt)
 			stars[i] = {old[1] + (love.math.random(-20, 20) / 21), old[2] + (love.math.random(-20, 20) / 21)}
 		end
 	end
-	power = power + dt
+	power = power + (dt * appower)
 end
 
 function love.draw()
 	love.graphics.scale(s, s)
 	love.graphics.translate(t[1], t[2])
 	love.graphics.setLineStyle("smooth")
+	love.graphics.setColor(255, 255, 255, 150)	
+	love.graphics.printf(quote, fur.w / 2 - 200, fur.h / 2, 400, "center")
 	love.graphics.setLineWidth(1)
 	love.graphics.setColor(colors[1])
 	love.graphics.setFont(aqua[5])
@@ -189,17 +199,22 @@ function love.draw()
 end
 
 function beginContact(a, b, coll)
-	if a == met.f or b == met.f then
-		if a == rocks[nowrock].dow.f or b == rocks[nowrock].dow.f then
-			rocks[nowrock].dow.b:destroy()
-			rocks[nowrock].b:destroy()
-			rocks[nowrock].dow.f:destroy()
-			rocks[nowrock].f:destroy()
-			nowrock = nowrock + 1
-		end
+	if (a == met.f and b == rocks[nowrock].dow.f) or (b == met.f and a == rocks[nowrock].dow.f) then
+		rocks[nowrock].dow.b:destroy()
+		rocks[nowrock].b:destroy()
+		rocks[nowrock].dow.f:destroy()
+		rocks[nowrock].f:destroy()
+		nowrock = nowrock + 1
+		quote = quotes[love.math.random(#quotes)]
+	end
+	if (a == met.f and b == rocks[nowrock].f) or (b == met.f and a == rocks[nowrock].f) then
+		appower = 5	
 	end
 end
 function endContact(a, b, coll)
+	if (a == met.f and b == rocks[nowrock].f) or (b == met.f and a == rocks[nowrock].f) then
+		appower = 0		
+	end
 end
 function preSolve(a, b, coll)
 end

@@ -1,19 +1,25 @@
 -- COPYRIGHT: KISELEV NIKOLAY
 -- Licence: MIT
 -- StoneDust
--- Version: 0.9.45.23
+-- Version: 2.1.57.4
 
-mainsou = love.audio.newSource("long.wav", "static")
+mainsou = love.audio.newSource("da.mp3", "stream")
 mainsou:setLooping(true)
 mainsou:play()
 
 protomet = love.filesystem.read("met.i")
 if protomet == nil then
-	protomet = "-4-2-1-402-505-304030105-404-502"	
+	protomet = "-5-3-2-503-606-505040206-504-602"
 	love.filesystem.write("lvl.i", 1)
 end
 metamet = {protomet:sub(1,2), protomet:sub(3,4), protomet:sub(5,6), protomet:sub(7,8), protomet:sub(9,10), protomet:sub(11,12), protomet:sub(13,14), protomet:sub(15,16), protomet:sub(17,18), protomet:sub(19,20), protomet:sub(21,22), protomet:sub(23,24), protomet:sub(25,26), protomet:sub(27,28), protomet:sub(29,30), protomet:sub(31,32)}
 love.filesystem.write("met.i", table.concat(metamet, ""))
+st = love.filesystem.read("stndst.i")
+if st ~= nil then
+	score = tonumber(st)
+else
+	score = 1
+end
 
 sec = 0
 colors = {
@@ -127,6 +133,22 @@ function love.mousepressed(x, y)
 end
 
 function love.update(dt)
+	if love.keyboard.isDown("0") then
+		protomet = "-5-3-2-503-606-505040206-504-602"
+		love.filesystem.write("lvl.i", 1)
+		metamet = {protomet:sub(1,2), protomet:sub(3,4), protomet:sub(5,6), protomet:sub(7,8), protomet:sub(9,10), protomet:sub(11,12), protomet:sub(13,14), protomet:sub(15,16), protomet:sub(17,18), protomet:sub(19,20), protomet:sub(21,22), protomet:sub(23,24), protomet:sub(25,26), protomet:sub(27,28), protomet:sub(29,30), protomet:sub(31,32)}
+		love.filesystem.write("met.i", table.concat(metamet, ""))
+		st = love.filesystem.write("stndst.i", 0)
+		love.event.quit()
+	end
+	if love.keyboard.isDown("9") then
+		protomet = "-5-3-2-503-606-505040206-504-602"
+		love.filesystem.write("lvl.i", 1)
+		metamet = {protomet:sub(1,2), protomet:sub(3,4), protomet:sub(5,6), protomet:sub(7,8), protomet:sub(9,10), protomet:sub(11,12), protomet:sub(13,14), protomet:sub(15,16), protomet:sub(17,18), protomet:sub(19,20), protomet:sub(21,22), protomet:sub(23,24), protomet:sub(25,26), protomet:sub(27,28), protomet:sub(29,30), protomet:sub(31,32)}
+		love.filesystem.write("met.i", table.concat(metamet, ""))
+		st = love.filesystem.write("stndst.i", 1000)
+		love.event.quit()
+	end
 	sec = sec + dt
 	if sec > 0.05 then
 		sec = 0
@@ -242,7 +264,7 @@ function pause()
 		love.graphics.setFont(aqua[2])
 		love.graphics.print("Resume game", 140, 300, math.rad(-7))
 		love.graphics.setFont(aqua[3])
-		love.graphics.print("Restart", 340, 440, math.rad(-6))
+		love.graphics.print("Restart", 330, 440, math.rad(-6))
 		love.graphics.setFont(aqua[4])
 		love.graphics.print("Exit", 410, 570, math.rad(-5))
 		love.graphics.setColor(255, 255, 255, 255)
