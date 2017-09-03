@@ -1,11 +1,11 @@
 -- COPYRIGHT: KISELEV NIKOLAY
 -- Licence: MIT
 -- StoneDust
--- Version: 2.1.57.4
+-- Version: 2.2.0.0
 
-mainsou = love.audio.newSource("da.mp3", "stream")
-mainsou:setLooping(true)
-mainsou:play()
+if not love.filesystem.exists("clr.i") then
+	love.filesystem.write("clr.i", "#FF6E40")
+end
 
 protomet = love.filesystem.read("met.i")
 if protomet == nil then
@@ -22,13 +22,6 @@ else
 end
 
 sec = 0
-colors = {
-	{159, 168, 218},
-	{92, 107, 192},
-	{63, 81, 181},
-	{255, 112, 67},
-	{33, 150, 243}
-}
 fur = {w = 1500, h = 750}
 met = {tonumber(metamet[1])*30+1100, tonumber(metamet[2])*30+400, tonumber(metamet[3])*30+1100, tonumber(metamet[4])*30+400, tonumber(metamet[5])*30+1100, tonumber(metamet[6])*30+400, tonumber(metamet[7])*30+1100, tonumber(metamet[8])*30+400, tonumber(metamet[9])*30+1100, tonumber(metamet[10])*30+400, tonumber(metamet[11])*30+1100, tonumber(metamet[12])*30+400, tonumber(metamet[13])*30+1100, tonumber(metamet[14])*30+400, tonumber(metamet[15])*30+1100, tonumber(metamet[16])*30+400}
 stars = {}
@@ -47,6 +40,33 @@ function fit()
 	end
 end
 
+function plymain()
+	if not love.filesystem.exists("no.music") then
+		mus = "__m"
+		if love.audio.getSourceCount() < 1 then
+			mainsou = love.audio.newSource("da.mp3", "stream")
+			mainsou:setLooping(true)
+			mainsou:play()
+		end
+	else
+		mus = "nom"
+		love.audio.stop()
+	end
+end
+
+function hc(hex)
+	hex = hex:gsub("#","")
+	return tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6))
+end
+
+colors = {
+	{159, 168, 218},
+	{92, 107, 192},
+	{63, 81, 181},
+	{hc(love.filesystem.read("clr.i"))},
+	{33, 150, 243}
+}
+
 love.window.setMode(1200, 600, {borderless = true, fullscreen = true})
 love.window.setPosition(0, 0)
 love.graphics.setBackgroundColor(colors[3])
@@ -60,6 +80,7 @@ if love.filesystem.exists("main.ttf") then
 	}
 end
 fit()
+plymain()
 do --MESH
 	backimg = love.graphics.newImage("bg.bmp")
 	backimg:setWrap("repeat")
@@ -121,24 +142,31 @@ function love.mousepressed(x, y)
 	local w, h = love.window.getMode()
 	x = (x - (fortouch[1] * s)) / (fur.w * s)
 	y = (y - (fortouch[2] * s)) / (fur.h * s)
-	if x < 0.7 and y > 0 then
-		if y < 0.6 then
-			love.filesystem.load("start.lua")()
-		elseif y < 0.8 then
-			love.filesystem.load("deshop.lua")()
-		elseif y < 1 then
-			love.event.quit()
+	if y < 0.6 and y > 0.4 and x > 0.1 and x < 0.6 then
+		love.filesystem.load("start.lua")()
+	end
+	if y < 0.8 and y > 0.6 and x > 0.15 and x < 0.55 then
+		love.filesystem.load("deshop.lua")()
+	end
+	if y < 0.9 and y > 0.8 and x > 0.2 and x < 0.5 then
+		love.event.quit()
+	end
+	if x > 0.9 and y < 0.1 then
+		if love.filesystem.exists("no.music") then
+			love.filesystem.remove("no.music")
+		else
+			love.filesystem.write("no.music", "")
 		end
+		plymain()
 	end
 end
 
 function love.update(dt)
 	if love.keyboard.isDown("0") then
-		protomet = "-5-3-2-503-606-505040206-504-602"
-		love.filesystem.write("lvl.i", 1)
-		metamet = {protomet:sub(1,2), protomet:sub(3,4), protomet:sub(5,6), protomet:sub(7,8), protomet:sub(9,10), protomet:sub(11,12), protomet:sub(13,14), protomet:sub(15,16), protomet:sub(17,18), protomet:sub(19,20), protomet:sub(21,22), protomet:sub(23,24), protomet:sub(25,26), protomet:sub(27,28), protomet:sub(29,30), protomet:sub(31,32)}
-		love.filesystem.write("met.i", table.concat(metamet, ""))
-		st = love.filesystem.write("stndst.i", 0)
+		love.filesystem.remove("lvl.i")
+		love.filesystem.remove("met.i")
+		love.filesystem.remove("stndst.i")
+		love.filesystem.remove("clr.i")
 		love.event.quit()
 	end
 	if love.keyboard.isDown("9") then
@@ -170,6 +198,8 @@ function love.draw()
 	love.graphics.translate(t[1], t[2])
 	love.graphics.setLineStyle("smooth")
 	love.graphics.setLineWidth(1)	
+	love.graphics.setColor(255, 255, 255, 100)
+	love.graphics.print(mus, 1400, 10, 0, 0.5)
 	love.graphics.setColor(255, 255, 255, 200)
 	for i = 1, #stars do
 		love.graphics.circle("line", stars[i][1], stars[i][2], 1)

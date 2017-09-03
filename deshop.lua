@@ -1,7 +1,7 @@
 -- COPYRIGHT: KISELEV NIKOLAY
 -- Licence: MIT
 -- StoneDust
--- Version: 2.1.57.4
+-- Version: 2.2.0.0
 
 stns = {
 	"-5-3-2-503-606-505040206-504-602",
@@ -22,7 +22,7 @@ else
 	score = 1
 end
 
-cost = 30 + (lvl * 45)
+cost = 10 + (lvl * 15)
 text = "Upgrade!\n"..tostring(cost).." points"
 
 somx = 420
@@ -61,11 +61,14 @@ function love.mousepressed(x, y)
 		else
 			text = "You can't\nChange!"		
 		end
-	elseif y > 0.7 and x < 0.5 then
+	elseif y > 0.7 and x < 0.2 then
 		love.filesystem.load("main.lua")()
-	elseif score > cost then
+	elseif y > 0.7 and x < 0.4 then
+		love.filesystem.load("color.lua")()
+	elseif score >= cost then
 		if stns[lvl+1] ~= nil then
 			score = score - cost
+			cost = 10 + (lvl * 15)			
 			lvl = lvl + 1
 			love.filesystem.write("stndst.i", score)
 			love.filesystem.write("lvl.i", lvl)
@@ -104,6 +107,7 @@ function love.draw()
 	love.graphics.setFont(aqua[4])
 	love.graphics.print(tostring(score), 150, 200)
 	love.graphics.print("Exit", 100, 600)
+	love.graphics.print("Color", 400, 600)
 	love.graphics.print(text, 1000, 300)
 	love.graphics.setFont(aqua[5])	
 	love.graphics.setColor(255, 255, 255, 90)
@@ -112,7 +116,6 @@ function love.draw()
 	end
 	love.graphics.setLineWidth(5)
 	love.graphics.setColor(colors[4])
-	love.graphics.polygon("line", map)
 	for i, ma in ipairs(show) do
 		if i <= tonumber((lvl)) then
 			love.graphics.polygon("line", ma)
@@ -121,7 +124,9 @@ function love.draw()
 			love.graphics.circle("line", 150 * i + 8, 100, 50)
 		end
 	end
-	love.graphics.print("._.", 420, 420, 0.3, 1.6, 1.6, 0, 90)
+	love.graphics.setLineWidth(15)
+	love.graphics.polygon("line", map)	
+	love.graphics.print("._.", 420, 420, 0.3, 1.9, 1.9, 1, 85)
 	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.draw(mesh, meshp.x1, meshp.y1)
 	love.graphics.draw(mesh, meshp.x2, meshp.y2)

@@ -1,14 +1,7 @@
 -- COPYRIGHT: KISELEV NIKOLAY
 -- Licence: MIT
 -- StoneDust
--- Version: 2.1.57.4
-
-if bitso ~= nil then bitso:stop() end
-if love.filesystem.exists("s.waw") then
-	bitso = love.audio.newSource("s.wav", "static")
-	bitso:setLooping(true)
-	bitso:play()
-end
+-- Version: 2.2.0.0
 
 love.graphics.setBackgroundColor(colors[3])
 love.physics.setMeter(math.floor(fur.w / 3))
@@ -18,14 +11,27 @@ edge = {}
 edge.b = love.physics.newBody(World, 0, 0, "static")
 edge.s = love.physics.newChainShape(true, 0, -200, 0, fur.h, fur.w, fur.h, fur.w, -200)
 edge.f = love.physics.newFixture(edge.b, edge.s)
+repower = 0
 power = 0
 appower = 5
 sms = 0
 nowrock = 1
 isnow = nowrock
 
+page = -25
 quote = "touch up and jump,\ntouch side to roll"
-quotes = {""}
+quotes = {
+	"How happy is the little Stone",
+	"That rambles in the Road alone,",
+	"And doesn't care about Careers",
+	"And Exigencies never fears—",
+	"Whose Coat of elemental Brown",
+	"A passing Universe put on,",
+	"And independent as the Sun",
+	"Associates or glows alone,",
+	"Fulfilling absolute Decree",
+	"In casual simplicity—"
+}
 
 met = {
 	up = function()
@@ -156,6 +162,9 @@ function love.update(dt)
 		end
 	end
 	power = power + (dt * appower)
+	if power > 4 then
+		power = 0
+	end
 end
 
 function love.draw()
@@ -205,15 +214,19 @@ function beginContact(a, b, coll)
 		rocks[nowrock].dow.f:destroy()
 		rocks[nowrock].f:destroy()
 		nowrock = nowrock + 1
-		quote = quotes[love.math.random(#quotes)]
+		page = page + 0.25
+		if not (page > #quotes or page <= 0) then quote = quotes[page] else quote = "" end
+		power = 0
 	end
 	if (a == met.f and b == rocks[nowrock].f) or (b == met.f and a == rocks[nowrock].f) then
-		appower = 5	
+		appower = 5
+		power = 1
 	end
 end
 function endContact(a, b, coll)
 	if (a == met.f and b == rocks[nowrock].f) or (b == met.f and a == rocks[nowrock].f) then
-		appower = 0		
+		appower = 0
+		power = 0
 	end
 end
 function preSolve(a, b, coll)
