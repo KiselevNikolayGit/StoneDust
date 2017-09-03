@@ -30,7 +30,8 @@ quotes = {
 	"And independent as the Sun",
 	"Associates or glows alone,",
 	"Fulfilling absolute Decree",
-	"In casual simplicity—"
+	"In casual simplicity—",
+	"-- Emily\nDickinson"
 }
 
 met = {
@@ -162,8 +163,8 @@ function love.update(dt)
 		end
 	end
 	power = power + (dt * appower)
-	if power > 4 then
-		power = 0
+	if power > 6 then
+		met.up()
 	end
 end
 
@@ -216,17 +217,14 @@ function beginContact(a, b, coll)
 		nowrock = nowrock + 1
 		page = page + 0.25
 		if not (page > #quotes or page <= 0) then quote = quotes[page] else quote = "" end
-		power = 0
 	end
 	if (a == met.f and b == rocks[nowrock].f) or (b == met.f and a == rocks[nowrock].f) then
 		appower = 5
-		power = 1
 	end
 end
 function endContact(a, b, coll)
 	if (a == met.f and b == rocks[nowrock].f) or (b == met.f and a == rocks[nowrock].f) then
-		appower = 0
-		power = 0
+		appower = 1.1
 	end
 end
 function preSolve(a, b, coll)
